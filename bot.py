@@ -1,37 +1,22 @@
 import os
-import requests
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import Updater, CommandHandler
+from dotenv import load_dotenv
 
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-TMDB_KEY = os.getenv('TMDB_API_KEY')
-PREMIUM_LINK = os.getenv('PREMIUM_LINK')
-UPI_ID = os.getenv('UPI_ID')
+# Load environment variables
+load_dotenv()
 
-def start(u: Update, c: CallbackContext):
-    u.message.reply_text("👋 Welcome! Send me a movie name to get details.")
+# Get your bot token from environment
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-def premium(u: Update, c: CallbackContext):
-    u.message.reply_text(f"💰 Join our premium group (₹1/day). Send payment to +91 {UPI_ID} and join: {PREMIUM_LINK}")
-
-def movie(u: Update, c: CallbackContext):
-    name = u.message.text
-    url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_KEY}&query={name}"
-    r = requests.get(url).json()
-    if r.get('results'):
-        m = r['results'][0]
-        u.message.reply_text(f"🎬 {m['title']} ({m['release_date'][:4]})\n⭐ {m['vote_average']}\n📝 {m['overview']}")
-    else:
-        u.message.reply_text("❌ Movie not found!")
+def start(update, context):
+    update.message.reply_text("Welcome to the Movie Bot!")
 
 def main():
-    up = Updater(BOT_TOKEN, use_context=True)
-    dp = up.dispatcher
-    dp.add_handler(CommandHandler('start', start))
-    dp.add_handler(CommandHandler('premium', premium))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, movie))
-    up.start_polling()
-    up.idle()
+    updater = Updater(BOT_TOKEN, use_context=True)
+    dp = updater.dispatcher
+    dp.add_handler(CommandHandler("start", start))
+    updater.start_polling()
+    updater.idle()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
